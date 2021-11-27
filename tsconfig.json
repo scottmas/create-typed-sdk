@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "lib": ["ESNext", "dom"],
+    "module": "CommonJS",
+    "target": "ES2017",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmitHelpers": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "preserveWatchOutput": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": "src"
+  },
+  "include": ["./src"]
+}

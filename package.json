@@ -1,0 +1,30 @@
+{
+  "name": "bifrost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "scripts": {
+    "build": "run-p build:*",
+    "build:cjs": "node build.mjs --format cjs --outdir dist/cjs",
+    "build:esm": "node build.mjs --format esm --outdir dist/esm",
+    "build:cjs-ts": "tsc --outDir dist/cjs",
+    "build:esm-ts": "tsc --outDir dist/esm",
+    "dev": "yarn build && run-p -l 'build:* --watch'"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.13.15",
+    "fast-safe-stringify": "2.1.1",
+    "npm-run-all": "^4.1.5",
+    "react-query": "^3.33.5",
+    "typescript": "^4.5.2",
+    "yargs-parser": "^21.0.0"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "react-query": "*"
+  }
+}
