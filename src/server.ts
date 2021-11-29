@@ -1,14 +1,14 @@
-import { DeepAsyncFnRecord, Opts, TypedQuery } from "./types";
+import { DeepAsyncFnRecord, Opts, TypedSDK } from "./types";
 
-export function createBifrostQuery<
+export function createBifrostSDK<
   Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): TypedQuery<Endpoints> {
+>(opts: Opts): TypedSDK<Endpoints> {
   const getNextQuery = (path: string[]): any => {
     return new Proxy(
       () => {}, //use function as base, so that it can be called...
       {
         apply(__, ___, args) {
-          return opts.doFetch({ argument: args[0] || {}, path });
+          return opts.doFetch({ argument: args[0], path });
         },
         get(__, prop) {
           return getNextQuery(path.concat(prop.toString()));

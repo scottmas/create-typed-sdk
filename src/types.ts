@@ -1,8 +1,11 @@
 import type {
+  QueryClient,
   QueryFunctionContext,
   QueryKey,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "react-query";
@@ -10,16 +13,17 @@ import type {
 export type CreateTypedFauxSDKType<T extends DeepAsyncFnRecord<T>> = (
   opts: Opts
 ) => {
-  SDK: TypedQuery<T>;
+  SDK: TypedSDK<T>;
   useSDK: () => void;
 };
 
 export type Opts = {
+  queryClient: QueryClient;
   doFetch<TPageParam = any>(
     p: {
       path: readonly string[];
       argument: any;
-    } & QueryFunctionContext<readonly string[], TPageParam>
+    } & Partial<QueryFunctionContext<readonly string[], TPageParam>>
   ): Promise<any>;
 };
 
@@ -29,11 +33,19 @@ export type DeepAsyncFnRecord<T extends {}> = {
   [key in keyof T]: T[key] extends AsyncFn ? T[key] : DeepAsyncFnRecord<T[key]>;
 };
 
-export type TypedQuery<T extends DeepAsyncFnRecord<T>> = {
+export type TypedSDK<T extends DeepAsyncFnRecord<T>> = {
   [key in keyof T]: T[key] extends AsyncFn
-    ? (...args: Parameters<T[key]>) => ReturnType<T[key]>
+    ? (argument: Parameters<T[key]>[0]) => ReturnType<T[key]>
     : T[key] extends DeepAsyncFnRecord<T[key]>
-    ? TypedQuery<T[key]>
+    ? TypedSDK<T[key]>
+    : never;
+};
+
+export type TypedGetSDKQueryKey<T extends DeepAsyncFnRecord<T>> = {
+  [key in keyof T]: T[key] extends AsyncFn
+    ? (argument?: Parameters<T[key]>[0]) => string[]
+    : T[key] extends DeepAsyncFnRecord<T[key]>
+    ? (() => string[]) & TypedGetSDKQueryKey<T[key]>
     : never;
 };
 
@@ -70,6 +82,21 @@ export type TypedUseInfiniteQuery<T extends DeepAsyncFnRecord<T>> = {
         >
       ) => UseInfiniteQueryResult<TData, TError>
     : T[key] extends DeepAsyncFnRecord<T[key]>
-    ? TypedUseQuery<T[key]>
+    ? TypedUseInfiniteQuery<T[key]>
+    : never;
+};
+
+export type TypedUseSDKMutation<T extends DeepAsyncFnRecord<T>> = {
+  [key in keyof T]: T[key] extends AsyncFn
+    ? <
+        TData = Awaited<ReturnType<T[key]>>,
+        TError = unknown,
+        TVariables = Parameters<T[key]>[0],
+        TContext = unknown
+      >(
+        options?: UseMutationOptions<TData, TError, TVariables, TContext>
+      ) => UseMutationResult<TData, TError, TVariables, TContext>
+    : T[key] extends DeepAsyncFnRecord<T[key]>
+    ? TypedUseSDKMutation<T[key]>
     : never;
 };
