@@ -18,6 +18,9 @@ import {
 } from "react-query";
 import { createBifrostSDK } from "./server";
 
+//For convenience, export the react-query QueryClient type
+export type { QueryClient } from "react-query";
+
 export function createBifrost<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): {

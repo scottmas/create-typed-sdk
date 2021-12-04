@@ -1,25 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { render } from "react-dom";
-import type { ApiType } from "../server-api";
-import axios from "axios";
-import { createBifrost } from "bifrost";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQueryClient,
-} from "react-query";
+import { createServerSDK } from "../server-sdk";
+import { QueryClient, QueryClientProvider, useQueryClient } from "react-query";
 
 const queryClient = new QueryClient();
 
-const Bifrost = createBifrost<ApiType>({
-  queryClient,
-  doFetch: async ({ argument, path }) => {
-    return axios
-      .post(`http://localhost:8000/${path.join("/")}`, { argument })
-      .then((resp) => resp.data);
-  },
-});
+const { ServerSDK } = createServerSDK(queryClient);
 
 function App() {
   return (
@@ -31,16 +17,16 @@ function App() {
 
 function AppInner() {
   useEffect(() => {
-    Bifrost.sdk.accounts.someCoolAccountsFn({ foo: "asdf" }).then((data) => {
+    ServerSDK.sdk.accounts.someCoolAccountsFn({ foo: "asdf" }).then((data) => {
       console.log("Fetched data!", data.someValue);
     });
   }, []);
 
-  const r2 = Bifrost.useSDKMutation().accounts.someCoolAccountsFn();
+  const r2 = ServerSDK.useSDKMutation().accounts.someCoolAccountsFn();
 
   const qc = useQueryClient();
 
-  const r = Bifrost.useSDK().accounts.anotherCoolAccountsFn(
+  const r = ServerSDK.useSDK().accounts.anotherCoolAccountsFn(
     { bar: 123, blah: "asdf" },
     {
       select: (a) => a.waddup,
@@ -50,7 +36,7 @@ function AppInner() {
   return (
     <div
       onClick={() => {
-        const asdf = Bifrost.getSDKQueryKey.accounts.anotherCoolAccountsFn({
+        const asdf = ServerSDK.getSDKQueryKey.accounts.anotherCoolAccountsFn({
           blah: "asdf",
           bar: 123,
         });

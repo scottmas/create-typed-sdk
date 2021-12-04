@@ -16,6 +16,7 @@
     "noEmitHelpers": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
+    "emitDeclarationOnly": true,
     "noImplicitThis": true,
     "preserveWatchOutput": true,
     "noPropertyAccessFromIndexSignature": true,
