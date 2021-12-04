@@ -1,9 +1,9 @@
-import { createBifrost, QueryClient } from "bifrost";
+import { createTypedSDK, QueryClient } from "create-typed-sdk";
 import axios from "axios";
 import type { ApiType } from "./server-api";
 
 export function createServerSDK(queryClient: QueryClient) {
-  const ServerSDK = createBifrost<ApiType>({
+  const ServerSDK = createTypedSDK<ApiType>({
     queryClient,
     doFetch: async ({ argument, path }) => {
       return axios
@@ -12,5 +12,6 @@ export function createServerSDK(queryClient: QueryClient) {
     },
   });
 
+  //Important: You should return a capitalized SDK so that rules of hooks treats the SDK like a namespace.
   return { ServerSDK };
 }

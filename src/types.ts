@@ -10,7 +10,7 @@ import type {
   UseQueryResult,
 } from "react-query";
 
-export type CreateTypedFauxSDKType<T extends DeepAsyncFnRecord<T>> = (
+export type CreateTypedSDKType<T extends DeepAsyncFnRecord<T>> = (
   opts: Opts
 ) => {
   SDK: TypedSDK<T>;
@@ -18,7 +18,7 @@ export type CreateTypedFauxSDKType<T extends DeepAsyncFnRecord<T>> = (
 };
 
 export type Opts = {
-  queryClient: QueryClient;
+  queryClient?: QueryClient;
   doFetch<TPageParam = any>(
     p: {
       path: readonly string[];
@@ -100,3 +100,5 @@ export type TypedUseSDKMutation<T extends DeepAsyncFnRecord<T>> = {
     ? TypedUseSDKMutation<T[key]>
     : never;
 };
+
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;

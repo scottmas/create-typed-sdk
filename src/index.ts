@@ -16,12 +16,12 @@ import {
   useQuery,
   UseQueryOptions,
 } from "react-query";
-import { createBifrostSDK } from "./server";
+import { createSimpleTypedSDK } from "./server";
 
 //For convenience, export the react-query QueryClient type
 export type { QueryClient } from "react-query";
 
-export function createBifrost<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+export function createTypedSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): {
   sdk: TypedSDK<Endpoints>;
@@ -32,21 +32,26 @@ export function createBifrost<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   useSDKMutation: () => TypedUseSDKMutation<Endpoints>;
 } {
   return {
-    sdk: createBifrostSDK<Endpoints>(opts),
-    sdkPrefetch: createBifrostSDKPrefetch<Endpoints>(opts),
+    sdk: createSimpleTypedSDK<Endpoints>(opts),
+    sdkPrefetch: createSDKPrefetch<Endpoints>(opts),
     getSDKQueryKey: createGetSDKQueryKey<Endpoints>(opts),
-    useSDK: createBifrostUseSDK<Endpoints>(opts),
-    useInfiniteSDK: createBifrostUseInfiniteSDK<Endpoints>(opts),
-    useSDKMutation: createBifrostUseSDKMutation<Endpoints>(opts),
+    useSDK: createUseSDK<Endpoints>(opts),
+    useInfiniteSDK: createUseInfiniteSDK<Endpoints>(opts),
+    useSDKMutation: createUseSDKMutation<Endpoints>(opts),
   };
 }
 
-export function createBifrostUseSDK<
-  Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): () => TypedUseSDK<Endpoints> {
+function createUseSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+  opts: Opts
+): () => TypedUseSDK<Endpoints> {
   const getNextUseSDK = (p: { path: string[] }): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
+        if (!opts.queryClient) {
+          console.error("No query client provided. Unable to call useSDK");
+          return Promise.resolve();
+        }
+
         const argument = args[0] as any;
 
         const extraQueryOpts = (args[1] || {}) as UseQueryOptions;
@@ -81,12 +86,19 @@ export function createBifrostUseSDK<
   return useQueryRet;
 }
 
-export function createBifrostUseInfiniteSDK<
-  Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): () => TypedUseInfiniteSDK<Endpoints> {
+function createUseInfiniteSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+  opts: Opts
+): () => TypedUseInfiniteSDK<Endpoints> {
   const getNextUseInfiniteSDK = (p: { path: string[] }): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
+        if (!opts.queryClient) {
+          console.error(
+            "No query client provided. Unable to call useInfiniteSDK"
+          );
+          return Promise.resolve();
+        }
+
         const argument = args[0] as any;
 
         const extraQueryOpts = (args[1] || {}) as UseInfiniteQueryOptions;
@@ -120,12 +132,17 @@ export function createBifrostUseInfiniteSDK<
   return useQueryRet;
 }
 
-export function createBifrostUseSDKMutation<
-  Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): () => TypedUseSDKMutation<Endpoints> {
+function createUseSDKMutation<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+  opts: Opts
+): () => TypedUseSDKMutation<Endpoints> {
   const getNextUseMutation = (p: { path: string[] }): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
+        if (!opts.queryClient) {
+          console.error("No query client provided. Unable to use mutation");
+          return Promise.resolve();
+        }
+
         const argument = args[0] as any;
 
         const extraQueryOpts = (args[1] || {}) as UseMutationOptions;
@@ -158,16 +175,20 @@ export function createBifrostUseSDKMutation<
   return useMutationRet;
 }
 
-export function createBifrostSDKPrefetch<
-  Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): TypedSDK<Endpoints> {
+function createSDKPrefetch<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+  opts: Opts
+): TypedSDK<Endpoints> {
   const getNextSDK = (path: string[]): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
+        if (!opts.queryClient) {
+          console.error("No query client provided. Unable to prefetch");
+          return Promise.resolve();
+        }
         const argument = args[0];
         const prom = opts.doFetch({ argument, path });
         prom.then((resp) => {
-          opts.queryClient.setQueryData(getQueryKey(path, argument), resp);
+          opts.queryClient?.setQueryData(getQueryKey(path, argument), resp);
         });
 
         return prom;
@@ -181,9 +202,9 @@ export function createBifrostSDKPrefetch<
   return getNextSDK([]);
 }
 
-export function createGetSDKQueryKey<
-  Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): TypedGetSDKQueryKey<Endpoints> {
+function createGetSDKQueryKey<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+  opts: Opts
+): TypedGetSDKQueryKey<Endpoints> {
   const getNextGetSDKQueryKey = (path: string[]): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {

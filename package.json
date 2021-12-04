@@ -1,5 +1,5 @@
 {
-  "name": "bifrost",
+  "name": "create-typed-sdk",
   "version": "1.0.0",
   "description": "",
   "main": "./dist/cjs/index.js",

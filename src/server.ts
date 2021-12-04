@@ -1,6 +1,6 @@
 import { DeepAsyncFnRecord, Opts, TypedSDK } from "./types";
 
-export function createBifrostSDK<
+export function createSimpleTypedSDK<
   Endpoints extends DeepAsyncFnRecord<Endpoints>
 >(opts: Opts): TypedSDK<Endpoints> {
   const getNextQuery = (path: string[]): any => {

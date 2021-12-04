@@ -1,5 +1,5 @@
 import { api } from "./server-api";
-import { collectEndpoints } from "bifrost/server";
+import { collectEndpoints } from "create-typed-sdk/server";
 import fastify from "fastify";
 import cors from "fastify-cors";
 
