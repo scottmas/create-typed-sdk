@@ -1,8 +1,8 @@
 import { DeepAsyncFnRecord, Opts, TypedSDK } from "./types";
 
-export function createSimpleTypedSDK<
-  Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): TypedSDK<Endpoints> {
+export function createFetcher<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+  opts: Opts
+): TypedSDK<Endpoints> {
   const getNextQuery = (path: string[]): any => {
     return new Proxy(
       () => {}, //use function as base, so that it can be called...

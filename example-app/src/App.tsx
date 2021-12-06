@@ -17,16 +17,18 @@ function App() {
 
 function AppInner() {
   useEffect(() => {
-    ServerSDK.sdk.accounts.someCoolAccountsFn({ foo: "asdf" }).then((data) => {
-      console.log("Fetched data!", data.someValue);
-    });
+    ServerSDK.fetch.accounts
+      .someCoolAccountsFn({ foo: "asdf" })
+      .then((data) => {
+        console.log("Fetched data!", data.someValue);
+      });
   }, []);
 
-  const r2 = ServerSDK.useSDKMutation().accounts.someCoolAccountsFn();
+  const r2 = ServerSDK.useMutationEndpoint().accounts.someCoolAccountsFn();
 
   const qc = useQueryClient();
 
-  const r = ServerSDK.useSDK().accounts.anotherCoolAccountsFn(
+  const r = ServerSDK.useEndpoint().accounts.anotherCoolAccountsFn(
     { bar: 123, blah: "asdf" },
     {
       select: (a) => a.waddup,
@@ -36,7 +38,7 @@ function AppInner() {
   return (
     <div
       onClick={() => {
-        const asdf = ServerSDK.getSDKQueryKey.accounts.anotherCoolAccountsFn({
+        const asdf = ServerSDK.getQueryKey.accounts.anotherCoolAccountsFn({
           blah: "asdf",
           bar: 123,
         });

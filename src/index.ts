@@ -16,7 +16,7 @@ import {
   useQuery,
   UseQueryOptions,
 } from "react-query";
-import { createSimpleTypedSDK } from "./server";
+import { createFetcher } from "./server";
 
 //For convenience, export the react-query QueryClient type
 export type { QueryClient } from "react-query";
@@ -24,27 +24,27 @@ export type { QueryClient } from "react-query";
 export function createTypedSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): {
-  sdk: TypedSDK<Endpoints>;
-  sdkPrefetch: TypedSDK<Endpoints>;
-  getSDKQueryKey: TypedGetSDKQueryKey<Endpoints>;
-  useSDK: () => TypedUseSDK<Endpoints>;
-  useInfiniteSDK: () => TypedUseInfiniteSDK<Endpoints>;
-  useSDKMutation: () => TypedUseSDKMutation<Endpoints>;
+  fetch: TypedSDK<Endpoints>;
+  prefetch: TypedSDK<Endpoints>;
+  getQueryKey: TypedGetSDKQueryKey<Endpoints>;
+  useEndpoint: () => TypedUseSDK<Endpoints>;
+  useInfiniteEndpoint: () => TypedUseInfiniteSDK<Endpoints>;
+  useMutationEndpoint: () => TypedUseSDKMutation<Endpoints>;
 } {
   return {
-    sdk: createSimpleTypedSDK<Endpoints>(opts),
-    sdkPrefetch: createSDKPrefetch<Endpoints>(opts),
-    getSDKQueryKey: createGetSDKQueryKey<Endpoints>(opts),
-    useSDK: createUseSDK<Endpoints>(opts),
-    useInfiniteSDK: createUseInfiniteSDK<Endpoints>(opts),
-    useSDKMutation: createUseSDKMutation<Endpoints>(opts),
+    fetch: createFetcher<Endpoints>(opts),
+    prefetch: createPrefetcher<Endpoints>(opts),
+    getQueryKey: createGetQueryKey<Endpoints>(opts),
+    useEndpoint: createUseEndpoint<Endpoints>(opts),
+    useInfiniteEndpoint: createUseInfiniteEndpoint<Endpoints>(opts),
+    useMutationEndpoint: createUseMutationEndpoint<Endpoints>(opts),
   };
 }
 
-function createUseSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+function createUseEndpoint<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): () => TypedUseSDK<Endpoints> {
-  const getNextUseSDK = (p: { path: string[] }): any => {
+  const getNextUseEndpoint = (p: { path: string[] }): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
         if (!opts.queryClient) {
@@ -74,22 +74,22 @@ function createUseSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
         return useQuery(queryOpts);
       },
       get(__, prop) {
-        return getNextUseSDK({
+        return getNextUseEndpoint({
           path: p.path.concat(prop.toString()),
         });
       },
     });
   };
 
-  const useQueryRet = () => getNextUseSDK({ path: [] });
+  const useQueryRet = () => getNextUseEndpoint({ path: [] });
 
   return useQueryRet;
 }
 
-function createUseInfiniteSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
-  opts: Opts
-): () => TypedUseInfiniteSDK<Endpoints> {
-  const getNextUseInfiniteSDK = (p: { path: string[] }): any => {
+function createUseInfiniteEndpoint<
+  Endpoints extends DeepAsyncFnRecord<Endpoints>
+>(opts: Opts): () => TypedUseInfiniteSDK<Endpoints> {
+  const getNextUseInfiniteEndpoint = (p: { path: string[] }): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
         if (!opts.queryClient) {
@@ -120,21 +120,21 @@ function createUseInfiniteSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
         return useInfiniteQuery(queryOpts);
       },
       get(__, prop) {
-        return getNextUseInfiniteSDK({
+        return getNextUseInfiniteEndpoint({
           path: p.path.concat(prop.toString()),
         });
       },
     });
   };
 
-  const useQueryRet = () => getNextUseInfiniteSDK({ path: [] });
+  const useQueryRet = () => getNextUseInfiniteEndpoint({ path: [] });
 
   return useQueryRet;
 }
 
-function createUseSDKMutation<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
-  opts: Opts
-): () => TypedUseSDKMutation<Endpoints> {
+function createUseMutationEndpoint<
+  Endpoints extends DeepAsyncFnRecord<Endpoints>
+>(opts: Opts): () => TypedUseSDKMutation<Endpoints> {
   const getNextUseMutation = (p: { path: string[] }): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
@@ -175,7 +175,7 @@ function createUseSDKMutation<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   return useMutationRet;
 }
 
-function createSDKPrefetch<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+function createPrefetcher<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): TypedSDK<Endpoints> {
   const getNextSDK = (path: string[]): any => {
@@ -202,7 +202,7 @@ function createSDKPrefetch<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   return getNextSDK([]);
 }
 
-function createGetSDKQueryKey<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
+function createGetQueryKey<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): TypedGetSDKQueryKey<Endpoints> {
   const getNextGetSDKQueryKey = (path: string[]): any => {

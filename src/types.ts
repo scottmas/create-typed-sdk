@@ -10,13 +10,6 @@ import type {
   UseQueryResult,
 } from "react-query";
 
-export type CreateTypedSDKType<T extends DeepAsyncFnRecord<T>> = (
-  opts: Opts
-) => {
-  SDK: TypedSDK<T>;
-  useSDK: () => void;
-};
-
 export type Opts = {
   queryClient?: QueryClient;
   doFetch<TPageParam = any>(
