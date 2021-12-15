@@ -1,4 +1,4 @@
-example-app
+node_modules
+example-app/**/*
 .eslintrc
 build.mjs
-!dist
