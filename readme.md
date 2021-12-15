@@ -6,17 +6,16 @@ A library for quickly created SDKs for your Node.js Typescript backends. No buil
 
 ### Server
 
-Define a server file like so:
+#### 1. Define your backend as an arbitrarily deep object of async functions
+
+Note: This object can have ANY structure. The only requirements are (a) that the object leaf nodes are promise returning functions and (b) those functions only accept a SINGLE parameter.
+
+In this example we namespace by POST and GET properties on the API but this is simply a convention
 
 ```typescript
-// server.ts
+// api.ts
 
-// 1. Define your backend as an arbitrarily deep object of async functions
-
-//Note: This object can have ANY structure. The only requirements are (a) that the object leaf nodes are promise returning functions and (b) those functions only accept a SINGLE parameter.
-
-//In this example we namespace by POST and GET properties on the API but this is simply a convention
-const myApi = {
+export const myApi = {
   accounts: {
     GET: {
       async getById(p: { id: string }) {
@@ -45,26 +44,31 @@ const myApi = {
 };
 
 export type MyApiType = typeof myApi
+```
 
-// 2. Hook up your API to an actual server that listens for requests, such as fastify or express
+#### 2. Hook up the API to an actual server that listens for requests, such as fastify or express
+
+Note: Make sure you adhere to the conventions of the deep API object you defined.
+
+```typescript
+// server.ts
+
+import { myApi } from "./api.ts";
 import { collectEndpoints } from "create-typed-sdk/server";
 import fastify from "fastify";
 import cors from "fastify-cors";
 const app = fastify();
 
-app.register(cors, { origin: "*"});
+app.register(cors, { origin: "*" });
 
 collectEndpoints(myApi).forEach(({ fn, path }) => {
   const method = path[path.length - 2].toLowerCase();
 
-  app[method](
-    "/" + path.join("/"),
-    async (req, resp) => {
-      const data = method === 'get' ? req.query : req.body
-      const val = await fn(data);
-      resp.send(val);
-    }
-  );
+  app[method]("/" + path.join("/"), async (req, resp) => {
+    const data = method === "get" ? req.query : req.body;
+    const val = await fn(data);
+    resp.send(val);
+  });
 });
 
 (async () => {
@@ -77,14 +81,24 @@ collectEndpoints(myApi).forEach(({ fn, path }) => {
 })();
 ```
 
-### Frontend
+#### 3. Automagically create an SDK for consumers of your backend
 
-```TSX
-// 3. Define your rules and transport for translating a path (like `accounts.GET.getById`) into an actual request
-// Note that the assumptions of your backend must be adhered to here...
+When creating the SDK, you must define the rules and transport that will allow a simple object path (like `accounts.GET.getById`) and an argument to be translated an actual request.
+
+```typescript
+// sdk.tsx
+
+//Note: This file is typically going to be the 'main' file of your backend's package.json. This file is what external consumers of your API will be importing.
 import axios from 'axios';
-function doFetch({ path, argument }) {
+import type { MyApiType } from './api' //IMPORTANT NOTE: Only import the api TYPE, not the api itself so as not to expose server details to your client
+import { createTypedSDK } from "create-typed-sdk";
+import { QueryClient } from "react-query";
 
+const queryClient = new QueryClient();
+
+const MyServerSDK = createTypedSDK<ApiType>({
+  queryClient, //Add an optional react-query dependency for easy data fetching in React land
+  doFetch({ path, argument }) {
   const method = path[1]
   const data = method === 'GET' ? {params: argument} : {body: argument}
   return axios(`http://my-api-server.com/${path.join("/")}`, {
@@ -98,27 +112,21 @@ function doFetch({ path, argument }) {
 
     return resp.json();
   });
-}
-
-// 4. Import your Types and create the SDK
-import type { MyApiType } from './my-server' //IMPORTANT NOTE: Only import the api TYPE, not the api itself so as not to expose server details to your client
-import { createTypedSDK } from "create-typed-sdk";
-import { QueryClient } from "react-query";
-
-const queryClient = new QueryClient();
-
-const MyServerSDK = createTypedSDK<ApiType>({
-  queryClient, //Optional react-query dependency for easy data fetching in React land
-  doFetch,
+},
 });
+```
 
-// 5. Use it!
+#### 4. Consume the SDK in your frontend
+
+```TSX
+// App.tsx
+
+import { MyServerSDK }  from './sdk'
+
 function App(){
-
   // Note: It is recommended that your SDK be an uppercase variable like `MyServerSDK` (e.g a namespace) so that the hook usage below will be linted per the rules of hooks
   const resp = MyServerSDK.useEndpoint().accounts.GET.getById({id: "some-user})
 
   return <div>Hello, my name is {resp.data.name}</div>
-
 }
 ```
