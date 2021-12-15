@@ -1,6 +1,6 @@
 {
   "name": "create-typed-sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A library for quickly created SDKs for your Node.js Typescript backends. No build step, no risk of injecting your server code into your frontend, just sweet, sweet DX goodness.",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
