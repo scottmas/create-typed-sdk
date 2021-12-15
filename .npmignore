@@ -1,4 +1,5 @@
-node_modules
-example-app/**/*
+example-app/
 .eslintrc
 build.mjs
+tsconfig.json
+yarn.lock
