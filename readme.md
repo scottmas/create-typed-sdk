@@ -4,9 +4,15 @@ A library for quickly created SDKs for your Node.js Typescript backends. No buil
 
 ## Installation & Usage
 
-### Server
+Add the the package as a dependency
 
-#### 1. Define your backend as an arbitrarily deep object of async functions
+```bash
+npm install create-typed-sdk
+```
+
+Then perform the following steps
+
+### 1. Define your backend logic as an arbitrarily deep object of async functions
 
 Note: This object can have ANY structure. The only requirements are (a) that the object leaf nodes are promise returning functions and (b) those functions only accept a SINGLE parameter.
 
@@ -46,7 +52,7 @@ export const myApi = {
 export type MyApiType = typeof myApi
 ```
 
-#### 2. Hook up the API to an actual server that listens for requests, such as fastify or express
+### 2. Hook up deep API object to listen for requests, such as with fastify or express
 
 Note: Make sure you adhere to the conventions of the deep API object you defined.
 
@@ -81,9 +87,9 @@ collectEndpoints(myApi).forEach(({ fn, path }) => {
 })();
 ```
 
-#### 3. Automagically create an SDK for consumers of your backend
+### 3. Automagically create an SDK for consumers of your backend
 
-When creating the SDK, you must define the rules and transport that will allow a simple object path (like `accounts.GET.getById`) and an argument to be translated an actual request.
+Note: When creating the SDK, you must define the rules and transport that will allow a simple object path (like `accounts.GET.getById`) and an argument to be translated an actual request.
 
 ```typescript
 // sdk.tsx
@@ -116,7 +122,9 @@ const MyServerSDK = createTypedSDK<ApiType>({
 });
 ```
 
-#### 4. Consume the SDK in your frontend
+### 4. Consume the SDK in your frontend
+
+Import the backend SDK without any risk of leaking backend code
 
 ```TSX
 // App.tsx
