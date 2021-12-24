@@ -1,4 +1,11 @@
-import { DeepAsyncFnRecord, Opts, TypedSDK } from "./types";
+import {
+  DeepAsyncFnRecord,
+  Opts,
+  TypedGetSDKQueryKey,
+  TypedSDK,
+} from "./types";
+
+import safeStringify from "fast-safe-stringify";
 
 export function createFetcher<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
@@ -8,7 +15,16 @@ export function createFetcher<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
       () => {}, //use function as base, so that it can be called...
       {
         apply(__, ___, args) {
-          return opts.doFetch({ argument: args[0], path });
+          const argument = args[0];
+          const prom = opts.doFetch({ argument, path });
+
+          if (opts.queryClient) {
+            prom.then((resp) => {
+              opts.queryClient?.setQueryData(getQueryKey(path, argument), resp);
+            });
+          }
+
+          return prom;
         },
         get(__, prop) {
           return getNextQuery(path.concat(prop.toString()));
@@ -52,4 +68,12 @@ function isPlainObject(value: unknown) {
     return true;
   }
   return false;
+}
+
+export function getQueryKey(path: string[], argument: unknown) {
+  const queryKey = [...path];
+  if (argument !== "undefined") {
+    queryKey.push(safeStringify.stableStringify(argument));
+  }
+  return queryKey;
 }

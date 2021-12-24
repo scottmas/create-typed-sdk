@@ -1,4 +1,3 @@
-import safeStringify from "fast-safe-stringify";
 import {
   DeepAsyncFnRecord,
   TypedGetSDKQueryKey,
@@ -16,7 +15,7 @@ import {
   useQuery,
   UseQueryOptions,
 } from "react-query";
-import { createFetcher } from "./server";
+import { createFetcher, getQueryKey } from "./core";
 
 //For convenience, export the react-query QueryClient type
 export type { QueryClient } from "react-query";
@@ -34,12 +33,14 @@ export function createTypedSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   return {
     fetch: createFetcher<Endpoints>(opts),
     prefetch: createPrefetcher<Endpoints>(opts),
-    getQueryKey: createGetQueryKey<Endpoints>(opts),
+    getQueryKey: createGetQueryKey<Endpoints>(),
     useEndpoint: createUseEndpoint<Endpoints>(opts),
     useInfiniteEndpoint: createUseInfiniteEndpoint<Endpoints>(opts),
     useMutationEndpoint: createUseMutationEndpoint<Endpoints>(opts),
   };
 }
+
+function useSubscription() {}
 
 function createUseEndpoint<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
@@ -202,9 +203,9 @@ function createPrefetcher<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   return getNextSDK([]);
 }
 
-function createGetQueryKey<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
-  opts: Opts
-): TypedGetSDKQueryKey<Endpoints> {
+function createGetQueryKey<
+  Endpoints extends DeepAsyncFnRecord<Endpoints>
+>(): TypedGetSDKQueryKey<Endpoints> {
   const getNextGetSDKQueryKey = (path: string[]): any => {
     return new Proxy(() => {}, {
       apply(__, ___, args) {
@@ -217,12 +218,4 @@ function createGetQueryKey<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   };
 
   return getNextGetSDKQueryKey([]);
-}
-
-function getQueryKey(path: string[], argument: unknown) {
-  const queryKey = [...path];
-  if (argument !== "undefined") {
-    queryKey.push(safeStringify.stableStringify(argument));
-  }
-  return queryKey;
 }
