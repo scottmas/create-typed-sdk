@@ -40,8 +40,6 @@ export function createTypedSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   };
 }
 
-function useSubscription() {}
-
 function createUseEndpoint<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
 ): () => TypedUseSDK<Endpoints> {

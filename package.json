@@ -14,7 +14,8 @@
   "license": "ISC",
   "files": [
     "src",
-    "dist"
+    "dist",
+    "core"
   ],
   "scripts": {
     "build": "run-p build:*",
