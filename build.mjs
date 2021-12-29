@@ -5,7 +5,7 @@ const { _, ...argv } = yargs(process.argv.slice(2)) || {};
 console.log(argv);
 
 esbuild.build({
-  entryPoints: ["./src/index.ts", "./src/server.ts"],
+  entryPoints: ["./src/index.ts"],
   bundle: true,
   minify: false,
   platform: "neutral",

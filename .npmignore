@@ -1,5 +1,0 @@
-example-app/
-.eslintrc
-build.mjs
-tsconfig.json
-yarn.lock

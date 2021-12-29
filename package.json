@@ -12,6 +12,10 @@
   "homepage": "https://github.com/scottmas/create-typed-sdk",
   "author": "scottmas",
   "license": "ISC",
+  "files": [
+    "src",
+    "dist"
+  ],
   "scripts": {
     "build": "run-p build:*",
     "build:cjs": "node build.mjs --format cjs --outdir dist/cjs",
