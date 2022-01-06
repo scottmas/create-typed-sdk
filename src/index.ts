@@ -117,7 +117,7 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
     return getNextGetSDKQueryKey([]);
   })();
 
-  useEndpoint(): TypedUseSDK<Endpoints> {
+  private useEndpointProxy = (() => {
     const getNextUseEndpoint = (p: { path: string[] }): any => {
       return new Proxy(() => {}, {
         apply: (__, ___, args) => {
@@ -157,9 +157,13 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
     };
 
     return getNextUseEndpoint({ path: [] });
+  })();
+
+  useEndpoint(): TypedUseSDK<Endpoints> {
+    return this.useEndpointProxy;
   }
 
-  useInfiniteEndpoint(): TypedUseInfiniteSDK<Endpoints> {
+  private useInfiniteEndpointProxy = (() => {
     const getNextUseInfiniteEndpoint = (p: { path: string[] }): any => {
       return new Proxy(() => {}, {
         apply: (__, ___, args) => {
@@ -200,8 +204,13 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
     };
 
     return getNextUseInfiniteEndpoint({ path: [] });
+  })();
+
+  useInfiniteEndpoint(): TypedUseInfiniteSDK<Endpoints> {
+    return this.useInfiniteEndpointProxy;
   }
-  useMutationEndpoint(): TypedUseSDKMutation<Endpoints> {
+
+  private useMutationEndpointProxy = (() => {
     const getNextUseMutation = (p: { path: string[] }): any => {
       return new Proxy(() => {}, {
         apply: (__, ___, args) => {
@@ -239,6 +248,10 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
     };
 
     return getNextUseMutation({ path: [] });
+  })();
+
+  useMutationEndpoint(): TypedUseSDKMutation<Endpoints> {
+    return this.useMutationEndpointProxy;
   }
 }
 
