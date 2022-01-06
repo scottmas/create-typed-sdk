@@ -1,6 +1,0 @@
-{
-  "internal": true,
-  "main": "../dist/cjs/core.js",
-  "module": "../dist/esm/core.js",
-  "types": "../dist/cjs/core.d.ts"
-}

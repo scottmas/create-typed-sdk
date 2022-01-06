@@ -1,5 +1,4 @@
 import type {
-  QueryClient,
   QueryFunctionContext,
   QueryKey,
   UseInfiniteQueryOptions,
@@ -8,17 +7,22 @@ import type {
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
+  QueryClient,
 } from "react-query";
 
-export type Opts = {
-  queryClient?: QueryClient;
-  doFetch<TPageParam = any>(
-    p: {
-      path: readonly string[];
-      argument: any;
-    } & Partial<QueryFunctionContext<readonly string[], TPageParam>>
-  ): Promise<any>;
-};
+export type DoFetch = <TPageParam = any>(
+  p: {
+    path: readonly string[];
+    argument: any;
+  } & Partial<QueryFunctionContext<readonly string[], TPageParam>>
+) => Promise<any>;
+
+export type Opts =
+  | { url: string; queryClient?: QueryClient }
+  | {
+      queryClient?: QueryClient;
+      doFetch: DoFetch;
+    };
 
 export type AsyncFn = (...args: any[]) => Promise<any>;
 

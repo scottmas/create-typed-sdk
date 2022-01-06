@@ -38,6 +38,7 @@
     "yargs-parser": "21.0.0"
   },
   "dependencies": {
+    "axios": "0.24.0",
     "fast-safe-stringify": "2.1.1",
     "react-query": "3.33.5"
   },

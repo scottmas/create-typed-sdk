@@ -1,5 +1,5 @@
 import { api } from "./server-api";
-import { collectEndpoints } from "create-typed-sdk/server";
+import { collectEndpoints } from "create-typed-sdk";
 import fastify from "fastify";
 import cors from "fastify-cors";
 

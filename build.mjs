@@ -10,6 +10,6 @@ esbuild.build({
   minify: false,
   platform: "neutral",
   sourcemap: true,
-  external: ["react-query", "fast-safe-stringify"],
+  external: ["react-query", "fast-safe-stringify", "axios"],
   ...argv,
 });
