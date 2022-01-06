@@ -26,13 +26,7 @@ export type { QueryClient } from "react-query";
 
 export function createTypedSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
   opts: Opts
-): {
-  fetch: TypedSDK<Endpoints>;
-  getQueryKey: TypedGetSDKQueryKey<Endpoints>;
-  useEndpoint: () => TypedUseSDK<Endpoints>;
-  useInfiniteEndpoint: () => TypedUseInfiniteSDK<Endpoints>;
-  useMutationEndpoint: () => TypedUseSDKMutation<Endpoints>;
-} {
+): SDK<Endpoints> {
   return new SDK(opts);
 }
 
