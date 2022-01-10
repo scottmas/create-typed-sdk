@@ -3,7 +3,7 @@ import axios from "axios";
 import type { ApiType } from "./server-api";
 
 export function createServerSDK(queryClient: QueryClient) {
-  const ServerSDK = createTypedSDK<ApiType>({
+  return createTypedSDK<ApiType>({
     queryClient,
     doFetch: async ({ argument, path }) => {
       return axios
@@ -11,7 +11,4 @@ export function createServerSDK(queryClient: QueryClient) {
         .then((resp) => resp.data);
     },
   });
-
-  //Important: You should return a capitalized SDK so that rules of hooks treats the SDK like a namespace.
-  return { ServerSDK };
 }

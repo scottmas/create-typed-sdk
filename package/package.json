@@ -1,0 +1,51 @@
+{
+  "name": "create-typed-sdk",
+  "version": "0.0.3",
+  "description": "A library for quickly created SDKs for your Node.js Typescript backends. No build step, no risk of injecting your server code into your frontend, just sweet, sweet DX goodness.",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scottmas/create-typed-sdk.git"
+  },
+  "homepage": "https://github.com/scottmas/create-typed-sdk",
+  "author": "scottmas",
+  "license": "ISC",
+  "files": [
+    "src",
+    "dist",
+    "core"
+  ],
+  "scripts": {
+    "dev": "yarn build && run-p -l 'build:* --watch'",
+    "build": "run-p build:*",
+    "build:cjs": "node build.mjs --format cjs --outdir dist/cjs --platform node ",
+    "build:esm": "node build.mjs --format esm --outdir dist/esm --platform node",
+    "build:cjs-ts": "tsc --outDir dist/cjs",
+    "build:esm-ts": "tsc --outDir dist/esm"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.4.0",
+    "@typescript-eslint/parser": "5.4.0",
+    "esbuild": "0.13.15",
+    "eslint": "8.3.0",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "np": "7.6.0",
+    "react-query": "3.34.7",
+    "typescript": "4.5.2",
+    "yargs-parser": "21.0.0"
+  },
+  "dependencies": {
+    "axios": "0.24.0",
+    "fast-safe-stringify": "2.1.1"
+  },
+  "peerDependencies": {
+    "react-query": "*"
+  },
+  "peerDependenciesMeta": {
+    "react-query": {
+      "optional": true
+    }
+  }
+}

@@ -2,14 +2,15 @@ import esbuild from "esbuild";
 import yargs from "yargs-parser";
 const { _, ...argv } = yargs(process.argv.slice(2)) || {};
 
-console.log(argv);
-
-esbuild.build({
+const conf = {
   entryPoints: ["./src/index.ts"],
   bundle: true,
+  format: "cjs",
   minify: false,
-  platform: "neutral",
   sourcemap: true,
   external: ["react-query", "fast-safe-stringify", "axios"],
   ...argv,
-});
+};
+
+console.log(conf);
+esbuild.build(conf);

@@ -1,13 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { render } from "react-dom";
 import { createServerSDK } from "../server-sdk";
 import { QueryClient, QueryClientProvider, useQueryClient } from "react-query";
 
 const queryClient = new QueryClient();
 
-const { ServerSDK } = createServerSDK(queryClient);
-
+const sdkProm = createServerSDK(queryClient);
+let ServerSDK: Awaited<typeof sdkProm>;
 function App() {
+  const [hasBootstraped, setHasBootstraped] = useState(false);
+  useEffect(() => {
+    sdkProm.then((sdk) => {
+      ServerSDK = sdk;
+      setHasBootstraped(true);
+    });
+  }, []);
+
+  if (!hasBootstraped) {
+    return null;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppInner />

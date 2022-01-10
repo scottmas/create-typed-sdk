@@ -10,23 +10,26 @@ import {
   TypedUseSDKMutation,
   DoFetch,
 } from "./types";
-import {
+import type {
   QueryClient,
-  useInfiniteQuery,
   UseInfiniteQueryOptions,
-  useMutation,
   UseMutationOptions,
-  useQuery,
   UseQueryOptions,
+  default as rqDefault,
 } from "react-query";
 import axios from "axios";
 
 //For convenience, export the react-query QueryClient type
 export type { QueryClient } from "react-query";
 
-export function createTypedSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>>(
-  opts: Opts
-): SDK<Endpoints> {
+let reactQuery: typeof rqDefault;
+export async function createTypedSDK<
+  Endpoints extends DeepAsyncFnRecord<Endpoints>
+>(opts: Opts): Promise<SDK<Endpoints>> {
+  if (opts.queryClient) {
+    reactQuery = await import("react-query");
+  }
+
   return new SDK(opts);
 }
 
@@ -140,7 +143,7 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
           };
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return useQuery(queryOpts);
+          return reactQuery.useQuery(queryOpts);
         },
         get(__, prop) {
           return getNextUseEndpoint({
@@ -186,6 +189,9 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
             },
             ...extraQueryOpts,
           };
+
+          const useInfiniteQuery = reactQuery.useInfiniteQuery;
+
           // eslint-disable-next-line react-hooks/rules-of-hooks
           return useInfiniteQuery(queryOpts);
         },
@@ -229,6 +235,8 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
             },
             ...extraQueryOpts,
           };
+
+          const useMutation = reactQuery.useMutation;
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
           return useMutation(queryOpts);

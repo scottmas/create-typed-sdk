@@ -4,7 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "lib": ["ESNext", "dom"],
-    "module": "CommonJS",
+    "module": "es2020",
     "target": "ES2017",
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -13,10 +13,8 @@
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "noFallthroughCasesInSwitch": true,
-    "noEmitHelpers": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "emitDeclarationOnly": true,
     "noImplicitThis": true,
     "preserveWatchOutput": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -26,9 +24,11 @@
     "strictPropertyInitialization": true,
     "strictNullChecks": true,
     "sourceMap": true,
+    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "rootDir": "src"
+    "rootDir": "src",
+    "outDir": "dist"
   },
   "include": ["./src"]
 }
