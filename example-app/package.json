@@ -9,7 +9,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "create-typed-sdk": "link:../package"
+    "create-typed-sdk": "link:.."
   },
   "devDependencies": {
     "@types/express": "4.17.13",
