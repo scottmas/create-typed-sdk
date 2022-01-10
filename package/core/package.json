@@ -1,0 +1,6 @@
+{
+  "internal": true,
+  "main": "../dist/cjs/coreSDK.js",
+  "module": "../dist/esm/coreSDK.js",
+  "types": "../dist/esm/coreSDK.d.ts"
+}

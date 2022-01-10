@@ -5,21 +5,8 @@ import { QueryClient, QueryClientProvider, useQueryClient } from "react-query";
 
 const queryClient = new QueryClient();
 
-const sdkProm = createServerSDK(queryClient);
-let ServerSDK: Awaited<typeof sdkProm>;
+const ServerSDK = createServerSDK(queryClient);
 function App() {
-  const [hasBootstraped, setHasBootstraped] = useState(false);
-  useEffect(() => {
-    sdkProm.then((sdk) => {
-      ServerSDK = sdk;
-      setHasBootstraped(true);
-    });
-  }, []);
-
-  if (!hasBootstraped) {
-    return null;
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <AppInner />

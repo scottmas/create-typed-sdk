@@ -1,9 +1,10 @@
-import { createTypedSDK, QueryClient } from "create-typed-sdk";
+import { createTypedReactSDK } from "create-typed-sdk";
 import axios from "axios";
 import type { ApiType } from "./server-api";
+import { QueryClient } from "react-query";
 
 export function createServerSDK(queryClient: QueryClient) {
-  return createTypedSDK<ApiType>({
+  return createTypedReactSDK<ApiType>({
     queryClient,
     doFetch: async ({ argument, path }) => {
       return axios

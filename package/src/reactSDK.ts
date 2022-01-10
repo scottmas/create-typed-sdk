@@ -1,5 +1,3 @@
-import safeStringify from "fast-safe-stringify";
-
 import {
   DeepAsyncFnRecord,
   TypedGetSDKQueryKey,
@@ -9,95 +7,50 @@ import {
   TypedUseQuery as TypedUseSDK,
   TypedUseSDKMutation,
   DoFetch,
-} from "./types";
-import type {
+  getQueryKey,
+  getFetchFn,
+  getTypedSDKInstance,
+} from "./internal";
+import {
   QueryClient,
   UseInfiniteQueryOptions,
   UseMutationOptions,
   UseQueryOptions,
-  default as rqDefault,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
 } from "react-query";
-import axios from "axios";
 
-//For convenience, export the react-query QueryClient type
-export type { QueryClient } from "react-query";
+export * from "./coreSDK";
 
-let reactQuery: typeof rqDefault;
-export async function createTypedSDK<
+//Re-export the query client type when the user is creating the sdk for consumption
+export { QueryClient } from "react-query";
+
+export function createTypedReactSDK<
   Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): Promise<SDK<Endpoints>> {
-  if (opts.queryClient) {
-    reactQuery = await import("react-query");
-  }
-
+>(opts: Opts): SDK<Endpoints> {
   return new SDK(opts);
 }
 
 class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
-  private defaultUrl?: string;
   private queryClient?: QueryClient;
-  private userSuppliedDoFetch?: DoFetch;
+  private doFetch: DoFetch;
 
   constructor(opts: Opts) {
-    if ("doFetch" in opts) {
-      this.userSuppliedDoFetch = opts.doFetch;
-    }
-
-    if ("url" in opts) {
-      this.defaultUrl = opts.url;
-    }
-
     this.queryClient = opts.queryClient;
+    if ("doFetch" in opts) {
+      this.doFetch = getFetchFn({ userSuppliedDoFetch: opts.doFetch });
+    } else {
+      this.doFetch = getFetchFn({ defaultUrl: opts.url });
+    }
+
+    this.fetch = getTypedSDKInstance({
+      queryClient: opts.queryClient,
+      doFetch: this.doFetch,
+    });
   }
 
-  private doFetch: DoFetch = (p) => {
-    if (this.userSuppliedDoFetch) {
-      return this.userSuppliedDoFetch(p);
-    } else {
-      if (!this.defaultUrl) {
-        throw new Error(
-          "url must be supplied to SDK constructor if no doFetch function is provided"
-        );
-      }
-
-      return axios
-        .post(`${this.defaultUrl}/${p.path.join("/")}`, {
-          argument: p.argument,
-        })
-        .then((resp) => resp.data);
-    }
-  };
-
-  fetch: TypedSDK<Endpoints> = (() => {
-    const getNextQuery = (path: string[]): any => {
-      return new Proxy(
-        () => {}, //use function as base, so that it can be called...
-        {
-          apply: (__, ___, args) => {
-            const argument = args[0];
-
-            const prom = this.doFetch({ argument, path });
-
-            if (this.queryClient) {
-              prom.then((resp: any) => {
-                this.queryClient?.setQueryData(
-                  getQueryKey(path, argument),
-                  resp
-                );
-              });
-            }
-
-            return prom;
-          },
-          get(__, prop) {
-            return getNextQuery(path.concat(prop.toString()));
-          },
-        }
-      );
-    };
-
-    return getNextQuery([]);
-  })();
+  fetch: TypedSDK<Endpoints>;
 
   getQueryKey: TypedGetSDKQueryKey<Endpoints> = (() => {
     const getNextGetSDKQueryKey = (path: string[]): any => {
@@ -143,7 +96,7 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
           };
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return reactQuery.useQuery(queryOpts);
+          return useQuery(queryOpts);
         },
         get(__, prop) {
           return getNextUseEndpoint({
@@ -190,8 +143,6 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
             ...extraQueryOpts,
           };
 
-          const useInfiniteQuery = reactQuery.useInfiniteQuery;
-
           // eslint-disable-next-line react-hooks/rules-of-hooks
           return useInfiniteQuery(queryOpts);
         },
@@ -236,8 +187,6 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
             ...extraQueryOpts,
           };
 
-          const useMutation = reactQuery.useMutation;
-
           // eslint-disable-next-line react-hooks/rules-of-hooks
           return useMutation(queryOpts);
         },
@@ -255,86 +204,4 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
   useMutationEndpoint(): TypedUseSDKMutation<Endpoints> {
     return this.useMutationEndpointProxy;
   }
-}
-
-export function attachApiToAppWithDefault<T extends DeepAsyncFnRecord<T>>(
-  api: T,
-  app: {
-    post: (
-      path: string,
-      handler: (
-        req: { body: any },
-        resp: { send: (v: any) => any } | { json: (v: any) => any }
-      ) => void
-    ) => any;
-  }
-) {
-  collectEndpoints(api).forEach(({ fn, path }) => {
-    if (!app.post) {
-      throw new Error(
-        "No post method found on app! Ensure you are using a nodejs library like express or fastify"
-      );
-    }
-
-    app.post("/" + path.join("/"), async (req, resp) => {
-      if (!req.body) {
-        throw new Error(
-          "Unable to find post body! Ensure your server parses the request body and attaches it to the request"
-        );
-      }
-
-      const val = await fn(req.body.argument);
-      if ("send" in resp) {
-        resp.send(val);
-      } else if ("json" in resp) {
-        resp.json(val);
-      } else {
-        throw new Error(
-          "Unable to find method to send response! Ensure you are using a nodejs library like express or fastify"
-        );
-      }
-    });
-  });
-}
-
-export function collectEndpoints<T extends DeepAsyncFnRecord<T>>(api: T) {
-  function collectLeafFunctions(value: any, path = [] as string[]) {
-    const fns = [];
-    if (isPlainObject(value) || Array.isArray(value)) {
-      Object.keys(value).forEach((key) => {
-        fns.push(...collectLeafFunctions(value[key], path.concat(key)));
-      });
-    } else {
-      if (typeof value === "function") {
-        fns.push({
-          path,
-          fn: value,
-        });
-      }
-    }
-    return fns;
-  }
-  return collectLeafFunctions(api);
-}
-
-function isPlainObject(value: unknown) {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const proto = Object.getPrototypeOf(value);
-  if (proto === null && value !== Object.prototype) {
-    return true;
-  }
-  if (proto && Object.getPrototypeOf(proto) === null) {
-    return true;
-  }
-  return false;
-}
-
-function getQueryKey(path: string[], argument: unknown) {
-  const queryKey = [...path];
-  if (argument !== "undefined") {
-    queryKey.push(safeStringify.stableStringify(argument));
-  }
-  return queryKey;
 }

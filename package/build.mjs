@@ -3,7 +3,7 @@ import yargs from "yargs-parser";
 const { _, ...argv } = yargs(process.argv.slice(2)) || {};
 
 const conf = {
-  entryPoints: ["./src/index.ts"],
+  entryPoints: ["./src/reactSDK.ts", "./src/coreSDK.ts"],
   bundle: true,
   format: "cjs",
   minify: false,
@@ -12,5 +12,4 @@ const conf = {
   ...argv,
 };
 
-console.log(conf);
 esbuild.build(conf);

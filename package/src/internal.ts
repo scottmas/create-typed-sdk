@@ -1,3 +1,5 @@
+import axios from "axios";
+import safeStringify from "fast-safe-stringify";
 import type {
   QueryFunctionContext,
   QueryKey,
@@ -99,3 +101,64 @@ export type TypedUseSDKMutation<T extends DeepAsyncFnRecord<T>> = {
 };
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+
+export function getTypedSDKInstance(p: {
+  doFetch: DoFetch;
+  queryClient?: QueryClient;
+}) {
+  const getNextQuery = (path: string[]): any => {
+    return new Proxy(
+      () => {}, //use function as base, so that it can be called...
+      {
+        apply: (__, ___, args) => {
+          const argument = args[0];
+
+          const prom = p.doFetch({ argument, path });
+
+          if (p.queryClient) {
+            prom.then((resp: any) => {
+              p.queryClient?.setQueryData(getQueryKey(path, argument), resp);
+            });
+          }
+
+          return prom;
+        },
+        get(__, prop) {
+          return getNextQuery(path.concat(prop.toString()));
+        },
+      }
+    );
+  };
+
+  return getNextQuery([]);
+}
+
+export function getQueryKey(path: string[], argument: unknown) {
+  const queryKey = [...path];
+  if (argument !== "undefined") {
+    queryKey.push(safeStringify.stableStringify(argument));
+  }
+  return queryKey;
+}
+
+export function getFetchFn(
+  opts: { userSuppliedDoFetch: DoFetch } | { defaultUrl: string }
+): DoFetch {
+  return (p) => {
+    if ("userSuppliedDoFetch" in opts) {
+      return opts.userSuppliedDoFetch(p);
+    } else {
+      if (!opts.defaultUrl) {
+        throw new Error(
+          "url must be supplied to SDK constructor if no doFetch function is provided"
+        );
+      }
+
+      return axios
+        .post(`${opts.defaultUrl}/${p.path.join("/")}`, {
+          argument: p.argument,
+        })
+        .then((resp) => resp.data);
+    }
+  };
+}

@@ -2,9 +2,9 @@
   "name": "create-typed-sdk",
   "version": "0.0.3",
   "description": "A library for quickly created SDKs for your Node.js Typescript backends. No build step, no risk of injecting your server code into your frontend, just sweet, sweet DX goodness.",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/cjs/index.d.ts",
+  "main": "./dist/cjs/reactSDK.js",
+  "module": "./dist/esm/reactSDK.js",
+  "types": "./dist/esm/reactSDK.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/scottmas/create-typed-sdk.git"
@@ -20,8 +20,8 @@
   "scripts": {
     "dev": "yarn build && run-p -l 'build:* --watch'",
     "build": "run-p build:*",
-    "build:cjs": "node build.mjs --format cjs --outdir dist/cjs --platform node ",
-    "build:esm": "node build.mjs --format esm --outdir dist/esm --platform node",
+    "build:cjs": "node build.mjs --format cjs --outdir dist/cjs --platform node",
+    "build:esm": "node build.mjs --format esm --outdir dist/esm --platform browser",
     "build:cjs-ts": "tsc --outDir dist/cjs",
     "build:esm-ts": "tsc --outDir dist/esm"
   },
