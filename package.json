@@ -22,6 +22,7 @@
     "dev:lib": "yarn build && run-p -l 'build:* --watch'",
     "dev:example": "cd example-app && yarn dev",
     "postprepare": "cd example-app && yarn",
+    "do-publish": "npm login && npx np",
     "test": "echo no-tests",
     "build": "run-p build:*",
     "build:cjs": "node build.mjs --format cjs --outdir dist/cjs --platform node",
