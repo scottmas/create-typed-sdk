@@ -21,7 +21,7 @@
     "dev": "run-p dev:*",
     "dev:lib": "yarn build && run-p -l 'build:* --watch'",
     "dev:example": "cd example-app && yarn dev",
-    "postinstall": "cd example-app && yarn",
+    "postprepare": "cd example-app && yarn",
     "test": "echo no-tests",
     "build": "run-p build:*",
     "build:cjs": "node build.mjs --format cjs --outdir dist/cjs --platform node",
