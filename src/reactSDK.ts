@@ -34,11 +34,11 @@ export function createTypedReactSDK<
         queryClient: QueryClient;
         doFetch: DoFetch;
       }
-): SDK<Endpoints> {
-  return new SDK(opts);
+): ReactSDK<Endpoints> {
+  return new ReactSDK(opts);
 }
 
-class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
+export class ReactSDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
   private queryClient?: QueryClient;
   private doFetch: DoFetch;
 
