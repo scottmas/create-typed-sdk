@@ -1,7 +1,6 @@
 import {
   DeepAsyncFnRecord,
   TypedGetSDKQueryKey,
-  Opts,
   TypedSDK as TypedSDK,
   TypedUseInfiniteQuery as TypedUseInfiniteSDK,
   TypedUseQuery as TypedUseSDK,
@@ -28,7 +27,14 @@ export { QueryClient } from "react-query";
 
 export function createTypedReactSDK<
   Endpoints extends DeepAsyncFnRecord<Endpoints>
->(opts: Opts): SDK<Endpoints> {
+>(
+  opts:
+    | { url: string; queryClient: QueryClient }
+    | {
+        queryClient: QueryClient;
+        doFetch: DoFetch;
+      }
+): SDK<Endpoints> {
   return new SDK(opts);
 }
 
@@ -36,7 +42,14 @@ class SDK<Endpoints extends DeepAsyncFnRecord<Endpoints>> {
   private queryClient?: QueryClient;
   private doFetch: DoFetch;
 
-  constructor(opts: Opts) {
+  constructor(
+    opts:
+      | { url: string; queryClient: QueryClient }
+      | {
+          queryClient: QueryClient;
+          doFetch: DoFetch;
+        }
+  ) {
     this.queryClient = opts.queryClient;
     if ("doFetch" in opts) {
       this.doFetch = getFetchFn({ userSuppliedDoFetch: opts.doFetch });

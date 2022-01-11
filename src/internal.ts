@@ -19,13 +19,6 @@ export type DoFetch = <TPageParam = any>(
   } & Partial<QueryFunctionContext<readonly string[], TPageParam>>
 ) => Promise<any>;
 
-export type Opts =
-  | { url: string; queryClient?: QueryClient }
-  | {
-      queryClient?: QueryClient;
-      doFetch: DoFetch;
-    };
-
 export type AsyncFn = (...args: any[]) => Promise<any>;
 
 export type DeepAsyncFnRecord<T extends {}> = {
